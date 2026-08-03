@@ -49,6 +49,15 @@ docker run --rm \
   mqtt-base64-bridge
 ```
 
+Build and Push it with: 
+
+```
+docker build -t svelde/mqtt-base64-ridge:0.0.2 .
+docker push svelde/mqtt-base64-ridge:0.0.2
+```
+
+Note: You need Docker Desktop to build and push it.
+
 If your broker uses TLS, set `MQTT_USE_TLS=true`. No username or password is required for anonymous access.
 
 The JPEG topic and the control topic must be different topics. The control topic should publish JSON like:
@@ -62,4 +71,11 @@ The JPEG topic and the control topic must be different topics. The control topic
     }
   }
 }
+```
+
+## KubeCtl
+
+```
+sudo kubectl delete namespace nsmqttbase64bridge
+sudo kubectl apply -f mqtt-base64-bridge.yaml
 ```

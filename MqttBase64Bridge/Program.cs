@@ -15,7 +15,6 @@ var imageCooldownSeconds = GetEnvironmentInt("MQTT_IMAGE_COOLDOWN_SECONDS", 30);
 var peakToPeakDisplacementThreshold = GetEnvironmentDecimal("MQTT_PEAK_TO_PEAK_DISPLACEMENT_THRESHOLD", 5.0m);
 var clientId = GetEnvironment("MQTT_CLIENT_ID", $"jpg-base64-bridge-{Guid.NewGuid():N}");
 var stateGate = new object();
-decimal? latestPeakToPeakDisplacement = null;
 byte[]? lastImagePayload = null;
 DateTimeOffset? lastImagePublishUtc = null;
 
@@ -42,14 +41,14 @@ client.ApplicationMessageReceivedAsync += async args =>
     if (topic == controlTopic)
     {
         Console.WriteLine($"Received control message from '{controlTopic}' with {payloadBytes.Length} bytes.");
+
+        // Attempt to extract the Peak-to-Peak_Displacement value from the control message payload
+
         if (TryGetPeakToPeakDisplacement(payloadBytes, out var peakToPeakDisplacement))
         {
-            lock (stateGate)
-            {
-                latestPeakToPeakDisplacement = peakToPeakDisplacement;
-            }
-
             Console.WriteLine($"Updated displacement gate from '{controlTopic}' to {peakToPeakDisplacement:0.###}.");
+
+            // If the displacement is below the threshold, reset the last image publish time to allow immediate publishing when the displacement exceeds the threshold again.
 
             if (peakToPeakDisplacement < peakToPeakDisplacementThreshold)
             {
@@ -58,9 +57,12 @@ client.ApplicationMessageReceivedAsync += async args =>
                     lastImagePublishUtc = null;
                 }
 
-                Console.WriteLine($"Reset image cooldown because control displacement dropped below the threshold {peakToPeakDisplacementThreshold:0.###}.");
                 return;
             }
+
+            // If the displacement exceeds the threshold, attempt to publish the last cached image if it exists and if the cooldown period has elapsed.
+
+            Console.WriteLine($"Displacement {peakToPeakDisplacement:0.###} exceeds threshold {peakToPeakDisplacementThreshold:0.###}; attempting to publish cached image from '{inputTopic}' to '{outputTopic}'.");
 
             byte[]? imagePayload;
             DateTimeOffset? previousPublishUtc;
@@ -77,6 +79,8 @@ client.ApplicationMessageReceivedAsync += async args =>
                 return;
             }
 
+            Console.WriteLine($"Last image publish was at {previousPublishUtc?.ToString("o") ?? "never"}; checking cooldown period of {imageCooldownSeconds} seconds.");
+
             if (previousPublishUtc.HasValue)
             {
                 var elapsedSinceLastPublish = DateTimeOffset.UtcNow - previousPublishUtc.Value;
@@ -87,7 +91,10 @@ client.ApplicationMessageReceivedAsync += async args =>
                 }
             }
 
+            Console.WriteLine($"Publishing cached image from '{inputTopic}' to '{outputTopic}' because control displacement was {peakToPeakDisplacement:0.###} and cooldown period has elapsed.");
+
             var payloadBase64 = Convert.ToBase64String(imagePayload);
+
             var outbound = new
             {
                 sourceTopic = inputTopic,
@@ -103,6 +110,8 @@ client.ApplicationMessageReceivedAsync += async args =>
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = false
             });
+
+            Console.WriteLine($"Publishing {outboundJson.Length} bytes of JSON to '{outputTopic}'.");
 
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic(outputTopic)
