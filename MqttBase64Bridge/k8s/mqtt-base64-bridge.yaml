@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nsmqttbase64bridge
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-base64-bridge-config
+  namespace: nsmqttbase64bridge
+  labels:
+    app: mqtt-base64-bridge
+data:
+  MQTT_BROKER_HOST: "127.0.0.1"
+  MQTT_BROKER_PORT: "31883"
+  MQTT_USE_TLS: "false"
+  MQTT_INPUT_TOPIC: "rtsp/asset/162/snapshot"
+  MQTT_CONTROL_TOPIC: "iotedger/nld/helmond/building1/line1/wise2410vibration"
+  MQTT_OUTPUT_TOPIC: "rtsp/asset/162/base64snapshot"
+  MQTT_IMAGE_COOLDOWN_SECONDS: "30"
+  MQTT_PEAK_TO_PEAK_DISPLACEMENT_THRESHOLD: "0.0"
+  MQTT_CLIENT_ID: "mqtt-base64-bridge-k8s"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-base64-bridge
+  namespace: nsmqttbase64bridge
+  labels:
+    app: mqtt-base64-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-base64-bridge
+  template:
+    metadata:
+      labels:
+        app: mqtt-base64-bridge
+    spec:
+      containers:
+        - name: mqtt-base64-bridge
+          image: svelde/mqtt-base64-ridge:0.0.1
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: mqtt-base64-bridge-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

@@ -1,0 +1,11 @@
+# VS Code
+.vscode/
+.history/
+*.code-workspace
+
+# Visual Studio / local IDE
+.vs/
+
+# .NET build output
+bin/
+obj/
