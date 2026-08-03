@@ -57,6 +57,13 @@ client.ApplicationMessageReceivedAsync += async args =>
                     lastImagePublishUtc = null;
                 }
 
+                Console.WriteLine($"Displacement {peakToPeakDisplacement:0.###} is below threshold {peakToPeakDisplacementThreshold:0.###}; cooldown reset and publish skipped.");
+                return;
+            }
+
+            if (peakToPeakDisplacement == peakToPeakDisplacementThreshold)
+            {
+                Console.WriteLine($"Displacement {peakToPeakDisplacement:0.###} equals threshold {peakToPeakDisplacementThreshold:0.###}; publish skipped because value must be above threshold.");
                 return;
             }
 
@@ -116,11 +123,19 @@ client.ApplicationMessageReceivedAsync += async args =>
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic(outputTopic)
                 .WithPayload(Encoding.UTF8.GetBytes(outboundJson))
-                .WithContentType("application/json")
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
                 .Build();
 
-            await client.PublishAsync(message);
+            try
+            {
+                var publishResult = await client.PublishAsync(message);
+                Console.WriteLine($"Publish ack for '{outputTopic}': reasonCode={publishResult.ReasonCode}.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Publish failed for '{outputTopic}': {ex.Message}");
+                return;
+            }
 
             lock (stateGate)
             {
@@ -203,8 +218,16 @@ static bool TryGetPeakToPeakDisplacement(byte[] payloadBytes, out decimal? maxDi
 {
     decimal? foundMaximum = null;
 
-    using var document = JsonDocument.Parse(payloadBytes);
-    Visit(document.RootElement);
+    try
+    {
+        using var document = JsonDocument.Parse(payloadBytes);
+        Visit(document.RootElement);
+    }
+    catch (JsonException)
+    {
+        maxDisplacement = null;
+        return false;
+    }
 
     maxDisplacement = foundMaximum;
 
