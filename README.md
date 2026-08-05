@@ -52,8 +52,8 @@ docker run --rm \
 Build and Push it with: 
 
 ```
-docker build -t svelde/mqtt-base64-ridge:0.0.2 .
-docker push svelde/mqtt-base64-ridge:0.0.2
+docker build -t svelde/mqtt-base64-ridge:0.1.1 .
+docker push svelde/mqtt-base64-ridge:0.1.1
 ```
 
 Note: You need Docker Desktop to build and push it.

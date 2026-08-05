@@ -100,16 +100,19 @@ client.ApplicationMessageReceivedAsync += async args =>
 
             Console.WriteLine($"Publishing cached image from '{inputTopic}' to '{outputTopic}' because control displacement was {peakToPeakDisplacement:0.###} and cooldown period has elapsed.");
 
-            var payloadBase64 = Convert.ToBase64String(imagePayload);
+            var imagePayloadBase64 = Convert.ToBase64String(imagePayload);
 
             var outbound = new
             {
                 sourceTopic = inputTopic,
                 controlTopic,
+                peakToPeakDisplacementThreshold,
+                peakToPeakDisplacement,
                 contentType = "image/jpeg",
-                payloadLength = imagePayload.Length,
-                payloadBase64,
-                receivedAtUtc = DateTimeOffset.UtcNow
+                imagePayloadLength = imagePayload.Length,
+                imagePayloadBase64 = imagePayloadBase64,
+                imagePayloadBase64Length = imagePayloadBase64.Length,
+                receivedAtUtc = DateTime.UtcNow
             };
 
             var outboundJson = JsonSerializer.Serialize(outbound, new JsonSerializerOptions
