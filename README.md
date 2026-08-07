@@ -8,7 +8,7 @@ After an image is published, the bridge waits a configurable cooldown before pub
 ## Environment variables
 
 - `MQTT_BROKER_HOST` - MQTT broker host, default `localhost`
-- `MQTT_BROKER_PORT` - MQTT broker port, default `1883`
+- `MQTT_BROKER_PORT` - MQTT broker port, default `31883`
 - `MQTT_USE_TLS` - `true` to enable TLS
 - `MQTT_INPUT_TOPIC` - topic to subscribe to, default `images/jpeg`
 - `MQTT_CONTROL_TOPIC` - separate topic for JSON control messages, default `sensors/displacement`
