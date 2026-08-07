@@ -21,12 +21,15 @@ After an image is published, the bridge waits a configurable cooldown before pub
 
 ```json
 {
-  "sourceTopic": "images/jpeg/in",
-  "outputTopic": "images/jpeg/base64",
+  "sourceTopic": "images/jpeg",
+  "controlTopic": "sensors/displacement",
+  "peakToPeakDisplacementThreshold": 5.0,
+  "peakToPeakDisplacement": 6.2,
   "contentType": "image/jpeg",
-  "payloadLength": 12345,
-  "payloadBase64": "/9j/4AAQSkZJRgABAQAAAQABAAD...",
-  "receivedAtUtc": "2026-08-03T00:00:00+00:00"
+  "imagePayloadLength": 12345,
+  "imagePayloadBase64": "/9j/4AAQSkZJRgABAQAAAQABAAD...",
+  "imagePayloadBase64Length": 16460,
+  "receivedAtUtc": "2026-08-03T00:00:00Z"
 }
 ```
 
