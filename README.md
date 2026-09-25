@@ -1,5 +1,7 @@
 # MQTT JPEG to Base64 JSON bridge
 
+<img width="710" height="401" alt="image" src="https://github.com/user-attachments/assets/d195fd1c-bb98-49d0-8c12-b294f019d1f5" />
+
 This is a simple C# container that listens on an MQTT topic for JPEG payloads published as raw byte arrays, converts the bytes to base64, and republishes a JSON document to another MQTT topic.
 The broker connection is anonymous by default.
 It only forwards JPEG messages when the latest control message on a separate MQTT topic contains any `Peak-to-Peak_Displacement` value greater than a configurable decimal threshold. The default threshold is `5.0`.
