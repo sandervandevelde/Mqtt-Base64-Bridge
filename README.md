@@ -9,7 +9,7 @@ After an image is published, the bridge waits a configurable cooldown before pub
 
 ## Environment variables
 
-Send to `images/jpeg/base64`:
+These variables must be set when deploying the container:
 
 - `MQTT_BROKER_HOST` - MQTT broker host, default `localhost`
 - `MQTT_BROKER_PORT` - MQTT broker port, default `31883`
@@ -22,6 +22,8 @@ Send to `images/jpeg/base64`:
 - `MQTT_CLIENT_ID` - optional client id
 
 ## Example output
+
+Send to `images/jpeg/base64`:
 
 ```json
 {
