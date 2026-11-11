@@ -9,6 +9,8 @@ After an image is published, the bridge waits a configurable cooldown before pub
 
 ## Environment variables
 
+Send to `images/jpeg/base64`:
+
 - `MQTT_BROKER_HOST` - MQTT broker host, default `localhost`
 - `MQTT_BROKER_PORT` - MQTT broker port, default `31883`
 - `MQTT_USE_TLS` - `true` to enable TLS
